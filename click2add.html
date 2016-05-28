@@ -36,7 +36,7 @@
 			width: 85%;
 		}
 	</style>
-	<script type="text/javascript" src="jquery-2.2.3.js"></script>
+	<script src="js/jquery-2.2.4.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
 			// 新增
@@ -47,25 +47,57 @@
 				var form = $('div[id ^= "form"]:last');
 				// 匹配表單ID內的數值, 數值自動遞增
 				var num = parseInt(form.prop('id').match(/\d+/g), 10) + 1;
-				form.clone().prop('id','form'+num).insertAfter(form);
+		        // 正式新增
+				form.clone().prop('id','form'+num).insertAfter(form).hide().slideDown(400, function(){
+					// 至底滑動
+					var position = $(document).height() - $(window).height();
+					console.log(position);
+					$('html, body').animate({scrollTop: position}, 400);
+				});
 
 				// 選擇到新的表單
 				var newForm = $('div[id ^= "form"]:last');
-				// 解決ID重複的問題
+				                // 要進行操作的的欄位
+            	var clearColum = {
+                    'input': {
+                        'name[]': '姓名',
+                        'nickname[]': '暱稱',
+                        'phone[]': '電話',
+                        'url[]': '網址',
+                    }
+                };
+
+				// 要處理的element與Attribute
 				var input = {'label':'for', 'input':'id', 'button':'id'};
 				// ID與for的名稱
 				var attrName = new Array('name','nickname','phone','url','remove');
+				newForm.clearAllColum(clearColum);
 				newForm.replaceAttr(input, attrName, num);
 				newForm.find('h3').text('成員'+(newForm.index()+1));
-
-				// 至底滑動
-				var position = $(document).height() - $(window).height();
-				$('html, body').animate({scrollTop: position}, 500);
 			});
 
+			// 清空欄位資料
+			$.fn.clearAllColum = function(cloum){
+				var form = $(this);
+		        // 初始化所有的表單欄位
+		        $.each(cloum, function (ele, nameAttr) {
+		            $.each(nameAttr, function (name, val) {
+		                switch (ele) {
+		                    case 'input':
+		                        form.find(ele + '[name = "' + name + '"]').val('').removeAttr('value');
+		                        break;
+		                    case 'select':
+		                        form.find(ele + '[name = "' + name + '"] option').removeAttr("selected");
+		                        break;
+		                }
+		            });
+		        });
+			}
+
+			// 解決ID重複的問題
 			$.fn.replaceAttr = function(element, attrName, count){
+				var $this = $(this);
 				for (var i = attrName.length - 1; i >= 0; i--) {
-					var $this = $(this);
 					$.each(element, function(index, val) {
 						$this.find(index+'['+val+' ^= '+attrName[i]+']').prop(val,attrName[i]+count);
 					});
@@ -88,14 +120,12 @@
 					});
 				}
 			});
-
 		});
 
 
 	</script>
 </head>
 <body>
-
 	<div class="container">
 		<div class="form" id="form1">
 			<div class="title">
