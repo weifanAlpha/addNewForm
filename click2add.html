@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Click 2 Add</title>
+	<style>
+		body{
+			margin: 0;
+		}
+
+		.container{
+			margin: 0 auto;
+			width: 600px;
+		}
+
+		.form div{
+			margin-bottom: 15px;
+		}
+
+		.title{
+			height: 28px;
+			border-bottom: 2px solid #777;
+		}
+
+		label{
+			font-weight: 400;
+			margin-left: 15px;
+		}
+
+		input[type="text"]{
+			width: 18%;
+		}
+
+		input[type="url"]{
+			width: 85%;
+		}
+	</style>
+	<script type="text/javascript" src="jquery-2.2.3.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			// 新增
+			$('#add').on('click', function(event) {
+				event.preventDefault();
+				// 選擇至所有表單的最末一筆
+				// 選擇器,匹配id以form開頭者
+				var form = $('div[id ^= "form"]:last');
+				// 匹配表單ID內的數值, 數值自動遞增
+				var num = parseInt(form.prop('id').match(/\d+/g), 10) + 1;
+				form.clone().prop('id','form'+num).insertAfter(form);
+
+				// 選擇到新的表單
+				var newForm = $('div[id ^= "form"]:last');
+				// 解決ID重複的問題
+				var input = {'label':'for', 'input':'id', 'button':'id'};
+				// ID與for的名稱
+				var attrName = new Array('name','nickname','phone','url','remove');
+				newForm.replaceAttr(input, attrName, num);
+				newForm.find('h3').text('成員'+(newForm.index()+1));
+
+				// 至底滑動
+				var position = $(document).height() - $(window).height();
+				$('html, body').animate({scrollTop: position}, 500);
+			});
+
+			$.fn.replaceAttr = function(element, attrName, count){
+				for (var i = attrName.length - 1; i >= 0; i--) {
+					var $this = $(this);
+					$.each(element, function(index, val) {
+						$this.find(index+'['+val+' ^= '+attrName[i]+']').prop(val,attrName[i]+count);
+					});
+				}
+			}
+
+			// 刪除
+			$(document).on('click', 'button.remove', function(event) {
+				event.preventDefault();
+				var no = this.id.match(/\d+/g);
+				var formTotal = $('div[id ^= form]').length;
+
+				if(formTotal>1){
+					console.log(formTotal);
+					$('#form'+no).animate({height: '0'}, 600, function(){
+							$('#form'+no).remove();
+							for (var i = formTotal; i >= 1; i--) {
+								$('.form:eq('+(i-1)+')').find('h3').text('成員'+(i));
+							}
+					});
+				}
+			});
+
+		});
+
+
+	</script>
+</head>
+<body>
+
+	<div class="container">
+		<div class="form" id="form1">
+			<div class="title">
+				<h3>成員1</h3>
+			</div>
+			<div class="top">
+				<label for="name1">姓名</label>
+				<input type="text" name="name[]" id="name1" maxlength="10" />
+				<label for="nickname1">暱稱</label>
+				<input type="text" name="nickname[]" id="nickname1" maxlength="10" />
+				<label for="phone1">電話</label>
+				<input type="tel" name="phone[]" id="phone1" maxlength="15">
+				<button type="button" class="remove" id="remove1">刪除</button>
+			</div>
+			<div class="bottom">
+				<label for="url1">網址</label>
+				<input type="url" name="url[]" id="url1" />
+			</div>
+
+		</div>
+		<div>
+			<button type="button" id="add">添加+</button>
+		</div>
+	</div>
+</body>
+</html>
